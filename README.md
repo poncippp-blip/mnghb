@@ -1,17 +1,24 @@
-# MangaScans - Advanced Manga Scanlation Website
+# MangaScans - Frontend-Only Manga Scanlation Website
 
-A fully-featured, modern manga scanlation website built with Next.js 14, TypeScript, Prisma, and Tailwind CSS. Inspired by professional platforms like PhiliaScans, SilentQuill, and MangaDex.
+A beautiful, modern manga scanlation website frontend built with Next.js 14, TypeScript, and Tailwind CSS. Inspired by professional platforms like PhiliaScans, SilentQuill, and MangaDex.
 
-## Features
+> **Note**: This is a frontend-only version with mock data. Backend integration is not included but can be added later.
 
-### Core Features
-- **Modern UI/UX**: Beautiful, responsive design with dark mode support
-- **Advanced Manga Reader**: Multiple reading modes (single page, double page, long strip)
-- **User Authentication**: Email/password and OAuth (Google, GitHub) support
-- **Search & Filtering**: Powerful search with advanced filters (genre, status, type, etc.)
-- **User Library**: Bookmark favorite manga and track reading history
-- **Comments & Ratings**: Engage with the community through comments and ratings
-- **Admin Panel**: Complete manga and chapter management system
+## 🎨 Features
+
+### Beautiful UI/UX
+- **Modern Design**: Clean, responsive design with smooth animations
+- **Dark Mode**: Full dark mode support with smooth transitions
+- **Responsive**: Mobile-first design that works on all devices
+- **Smooth Animations**: Framer Motion powered transitions
+
+### Core Features (Frontend)
+- Advanced Manga Reader with multiple reading modes
+- Search and filtering system
+- Genre browsing
+- Latest and popular manga sections
+- Featured manga carousel
+- Responsive navigation with mobile menu
 
 ### User Features
 - Personal dashboard with reading statistics
@@ -37,36 +44,34 @@ A fully-featured, modern manga scanlation website built with Next.js 14, TypeScr
 - User role management (User, Scanlator, Admin)
 - View statistics and analytics
 
-## Tech Stack
+## 🚀 Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js
-- **State Management**: Zustand (for client state)
-- **Image Optimization**: Next.js Image component with Sharp
-- **Icons**: React Icons
 - **Animations**: Framer Motion
+- **Icons**: React Icons
+- **Carousel**: Swiper
+- **State Management**: Zustand
 - **Notifications**: React Hot Toast
 
-## Prerequisites
+## 📦 Installation
 
-Before you begin, ensure you have the following installed:
+### Prerequisites
+
 - Node.js 18+ and npm/yarn/pnpm
-- PostgreSQL database
 - Git
 
-## Installation
+### Quick Start
 
-### 1. Clone the repository
+1. **Clone the repository**
 
 ```bash
 git clone <your-repo-url>
 cd mnghb
 ```
 
-### 2. Install dependencies
+2. **Install dependencies**
 
 ```bash
 npm install
@@ -76,77 +81,7 @@ yarn install
 pnpm install
 ```
 
-### 3. Set up environment variables
-
-Copy the example environment file:
-
-```bash
-cp .env.example .env
-```
-
-Update the `.env` file with your configuration:
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/manga_db?schema=public"
-
-# NextAuth
-NEXTAUTH_SECRET="your-secret-key-here-change-in-production"
-NEXTAUTH_URL="http://localhost:3000"
-
-# OAuth Providers (Optional)
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-GITHUB_ID="your-github-oauth-id"
-GITHUB_SECRET="your-github-oauth-secret"
-
-# Upload Settings
-MAX_FILE_SIZE=10485760
-UPLOAD_DIR="./public/uploads"
-```
-
-#### Getting OAuth Credentials
-
-**Google OAuth:**
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable Google+ API
-4. Go to Credentials → Create Credentials → OAuth 2.0 Client ID
-5. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
-
-**GitHub OAuth:**
-1. Go to GitHub Settings → Developer Settings → OAuth Apps
-2. Click "New OAuth App"
-3. Set Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
-
-### 4. Set up the database
-
-Generate Prisma client:
-
-```bash
-npx prisma generate
-```
-
-Push the schema to your database:
-
-```bash
-npx prisma db push
-```
-
-(Optional) Open Prisma Studio to view/edit data:
-
-```bash
-npx prisma studio
-```
-
-### 5. Create uploads directory
-
-```bash
-mkdir -p public/uploads
-```
-
-### 6. Run the development server
+3. **Run the development server**
 
 ```bash
 npm run dev
@@ -156,7 +91,11 @@ yarn dev
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. **Open your browser**
+
+Visit [http://localhost:3000](http://localhost:3000)
+
+That's it! No database setup, no environment variables required. Just install and run!
 
 ## Database Schema
 
