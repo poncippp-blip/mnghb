@@ -1,72 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { prisma } from '@/lib/prisma'
 import MangaCard from '@/components/MangaCard'
 import { FiArrowRight, FiTrendingUp, FiClock } from 'react-icons/fi'
+import { mockManga } from '@/lib/mockData'
 
-async function getFeaturedManga() {
-  try {
-    const featured = await prisma.manga.findMany({
-      where: { featured: true },
-      take: 5,
-      include: {
-        genres: true,
-        chapters: {
-          orderBy: { chapterNumber: 'desc' },
-          take: 1,
-        },
-      },
-    })
-    return featured
-  } catch (error) {
-    return []
-  }
-}
-
-async function getLatestUpdates() {
-  try {
-    const latest = await prisma.manga.findMany({
-      take: 12,
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        genres: true,
-        chapters: {
-          orderBy: { chapterNumber: 'desc' },
-          take: 1,
-        },
-      },
-    })
-    return latest
-  } catch (error) {
-    return []
-  }
-}
-
-async function getPopularManga() {
-  try {
-    const popular = await prisma.manga.findMany({
-      take: 12,
-      orderBy: { views: 'desc' },
-      include: {
-        genres: true,
-        chapters: {
-          orderBy: { chapterNumber: 'desc' },
-          take: 1,
-        },
-      },
-    })
-    return popular
-  } catch (error) {
-    return []
-  }
-}
-
-export default async function Home() {
-  const [featured, latest, popular] = await Promise.all([
-    getFeaturedManga(),
-    getLatestUpdates(),
-    getPopularManga(),
-  ])
+export default function Home() {
+  const featured = mockManga.filter((m) => m.featured)
+  const latest = mockManga.slice(0, 12)
+  const popular = [...mockManga].sort((a, b) => b.views - a.views).slice(0, 12)
 
   return (
     <div className="min-h-screen">
@@ -98,10 +39,10 @@ export default async function Home() {
               <div className="flex flex-wrap gap-2 mb-6">
                 {featured[0].genres.slice(0, 5).map((genre) => (
                   <span
-                    key={genre.id}
+                    key={genre}
                     className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm"
                   >
-                    {genre.name}
+                    {genre}
                   </span>
                 ))}
               </div>
@@ -113,7 +54,7 @@ export default async function Home() {
                   <span>Read Now</span>
                   <FiArrowRight />
                 </Link>
-                {featured[0].chapters[0] && (
+                {featured[0].chapters.length > 0 && (
                   <Link
                     href={`/read/${featured[0].slug}/${featured[0].chapters[0].chapterNumber}`}
                     className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-full font-semibold hover:bg-white/30 transition"
@@ -156,7 +97,7 @@ export default async function Home() {
                   rating={manga.rating}
                   views={manga.views}
                   latestChapter={manga.chapters[0]?.chapterNumber}
-                  genres={manga.genres.map((g) => g.name)}
+                  genres={manga.genres}
                 />
               ))}
             </div>
@@ -195,7 +136,7 @@ export default async function Home() {
                   rating={manga.rating}
                   views={manga.views}
                   latestChapter={manga.chapters[0]?.chapterNumber}
-                  genres={manga.genres.map((g) => g.name)}
+                  genres={manga.genres}
                 />
               ))}
             </div>

@@ -1,80 +1,55 @@
-import { prisma } from '@/lib/prisma'
 import MangaCard from '@/components/MangaCard'
 import FilterSidebar from '@/components/FilterSidebar'
-import { MangaStatus, MangaType } from '@prisma/client'
+import { mockManga, mockGenres } from '@/lib/mockData'
 
 interface BrowsePageProps {
   searchParams: {
-    status?: MangaStatus
-    type?: MangaType
+    status?: string
+    type?: string
     genre?: string
     sort?: string
   }
 }
 
-async function getBrowseManga(filters: BrowsePageProps['searchParams']) {
-  const where: any = {}
+export default function BrowsePage({ searchParams }: BrowsePageProps) {
+  let filteredManga = [...mockManga]
 
-  if (filters.status) {
-    where.status = filters.status
+  // Filter by status
+  if (searchParams.status) {
+    filteredManga = filteredManga.filter((m) => m.status === searchParams.status)
   }
 
-  if (filters.type) {
-    where.type = filters.type
+  // Filter by type
+  if (searchParams.type) {
+    filteredManga = filteredManga.filter((m) => m.type === searchParams.type)
   }
 
-  if (filters.genre) {
-    where.genres = {
-      some: {
-        slug: filters.genre,
-      },
+  // Filter by genre
+  if (searchParams.genre) {
+    const genreName = mockGenres.find((g) => g.slug === searchParams.genre)?.name
+    if (genreName) {
+      filteredManga = filteredManga.filter((m) => m.genres.includes(genreName))
     }
   }
 
-  let orderBy: any = { updatedAt: 'desc' }
-
-  switch (filters.sort) {
+  // Sort
+  switch (searchParams.sort) {
     case 'popular':
-      orderBy = { views: 'desc' }
+      filteredManga.sort((a, b) => b.views - a.views)
       break
     case 'rating':
-      orderBy = { rating: 'desc' }
+      filteredManga.sort((a, b) => b.rating - a.rating)
       break
     case 'title':
-      orderBy = { title: 'asc' }
+      filteredManga.sort((a, b) => a.title.localeCompare(b.title))
       break
     case 'latest':
-      orderBy = { createdAt: 'desc' }
+      filteredManga.sort((a, b) => b.year - a.year)
+      break
+    default:
+      // Default: recently updated (use ID as proxy)
       break
   }
-
-  const manga = await prisma.manga.findMany({
-    where,
-    orderBy,
-    include: {
-      genres: true,
-      chapters: {
-        orderBy: { chapterNumber: 'desc' },
-        take: 1,
-      },
-    },
-    take: 48,
-  })
-
-  return manga
-}
-
-async function getGenres() {
-  return await prisma.genre.findMany({
-    orderBy: { name: 'asc' },
-  })
-}
-
-export default async function BrowsePage({ searchParams }: BrowsePageProps) {
-  const [manga, genres] = await Promise.all([
-    getBrowseManga(searchParams),
-    getGenres(),
-  ])
 
   return (
     <div className="min-h-screen py-12">
@@ -83,13 +58,13 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="lg:w-64 flex-shrink-0">
-            <FilterSidebar genres={genres} currentFilters={searchParams} />
+            <FilterSidebar genres={mockGenres} currentFilters={searchParams} />
           </aside>
 
           <div className="flex-1">
-            {manga.length > 0 ? (
+            {filteredManga.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {manga.map((m) => (
+                {filteredManga.map((m) => (
                   <MangaCard
                     key={m.id}
                     id={m.id}
@@ -99,7 +74,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                     rating={m.rating}
                     views={m.views}
                     latestChapter={m.chapters[0]?.chapterNumber}
-                    genres={m.genres.map((g) => g.name)}
+                    genres={m.genres}
                   />
                 ))}
               </div>

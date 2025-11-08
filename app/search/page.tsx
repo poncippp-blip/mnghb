@@ -1,7 +1,6 @@
-import { Suspense } from 'react'
-import { prisma } from '@/lib/prisma'
 import MangaCard from '@/components/MangaCard'
 import { FiSearch } from 'react-icons/fi'
+import { mockManga } from '@/lib/mockData'
 
 interface SearchPageProps {
   searchParams: {
@@ -9,36 +8,21 @@ interface SearchPageProps {
   }
 }
 
-async function searchManga(query: string) {
-  if (!query || query.trim().length === 0) {
-    return []
-  }
-
-  const manga = await prisma.manga.findMany({
-    where: {
-      OR: [
-        { title: { contains: query, mode: 'insensitive' } },
-        { description: { contains: query, mode: 'insensitive' } },
-        { alternativeTitles: { has: query } },
-        { author: { has: query } },
-      ],
-    },
-    include: {
-      genres: true,
-      chapters: {
-        orderBy: { chapterNumber: 'desc' },
-        take: 1,
-      },
-    },
-    take: 50,
-  })
-
-  return manga
-}
-
-export default async function SearchPage({ searchParams }: SearchPageProps) {
+export default function SearchPage({ searchParams }: SearchPageProps) {
   const query = searchParams.q || ''
-  const results = await searchManga(query)
+
+  const results = query.trim()
+    ? mockManga.filter((manga) => {
+        const searchLower = query.toLowerCase()
+        return (
+          manga.title.toLowerCase().includes(searchLower) ||
+          manga.description.toLowerCase().includes(searchLower) ||
+          manga.alternativeTitles.some((title) => title.toLowerCase().includes(searchLower)) ||
+          manga.author.some((author) => author.toLowerCase().includes(searchLower)) ||
+          manga.genres.some((genre) => genre.toLowerCase().includes(searchLower))
+        )
+      })
+    : []
 
   return (
     <div className="min-h-screen py-12">
@@ -47,7 +31,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <h1 className="text-3xl font-bold mb-2">Search Results</h1>
           {query && (
             <p className="text-gray-600 dark:text-gray-400">
-              Found {results.length} results for "{query}"
+              Found {results.length} results for &quot;{query}&quot;
             </p>
           )}
         </div>
@@ -72,7 +56,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 rating={manga.rating}
                 views={manga.views}
                 latestChapter={manga.chapters[0]?.chapterNumber}
-                genres={manga.genres.map((g) => g.name)}
+                genres={manga.genres}
               />
             ))}
           </div>

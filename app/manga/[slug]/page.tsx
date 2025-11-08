@@ -1,12 +1,9 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
-import { formatDate, timeAgo } from '@/lib/utils'
-import { FiBookmark, FiEye, FiStar, FiClock } from 'react-icons/fi'
-import BookmarkButton from '@/components/BookmarkButton'
-import RatingComponent from '@/components/RatingComponent'
-import CommentSection from '@/components/CommentSection'
+import { timeAgo } from '@/lib/utils'
+import { FiEye, FiStar, FiClock } from 'react-icons/fi'
+import { mockManga } from '@/lib/mockData'
 
 interface MangaPageProps {
   params: {
@@ -14,38 +11,8 @@ interface MangaPageProps {
   }
 }
 
-async function getManga(slug: string) {
-  const manga = await prisma.manga.findUnique({
-    where: { slug },
-    include: {
-      genres: true,
-      chapters: {
-        orderBy: { chapterNumber: 'desc' },
-      },
-      _count: {
-        select: {
-          bookmarks: true,
-          comments: true,
-        },
-      },
-    },
-  })
-
-  if (!manga) {
-    return null
-  }
-
-  // Increment view count
-  await prisma.manga.update({
-    where: { id: manga.id },
-    data: { views: { increment: 1 } },
-  })
-
-  return manga
-}
-
-export default async function MangaPage({ params }: MangaPageProps) {
-  const manga = await getManga(params.slug)
+export default function MangaPage({ params }: MangaPageProps) {
+  const manga = mockManga.find((m) => m.slug === params.slug)
 
   if (!manga) {
     notFound()
@@ -108,22 +75,17 @@ export default async function MangaPage({ params }: MangaPageProps) {
                 <FiEye className="text-gray-500" />
                 <span>{manga.views.toLocaleString()} views</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <FiBookmark className="text-gray-500" />
-                <span>{manga._count.bookmarks} bookmarks</span>
-              </div>
             </div>
 
             {/* Genres */}
             <div className="flex flex-wrap gap-2 mb-6">
               {manga.genres.map((genre) => (
-                <Link
-                  key={genre.id}
-                  href={`/genre/${genre.slug}`}
+                <span
+                  key={genre}
                   className="px-3 py-1 bg-primary-500 text-white rounded-full text-sm hover:bg-primary-600 transition"
                 >
-                  {genre.name}
-                </Link>
+                  {genre}
+                </span>
               ))}
               <span className={`px-3 py-1 ${statusColors[manga.status]} text-white rounded-full text-sm`}>
                 {manga.status}
@@ -173,7 +135,6 @@ export default async function MangaPage({ params }: MangaPageProps) {
                   </Link>
                 </>
               )}
-              <BookmarkButton mangaId={manga.id} />
             </div>
 
             {/* Description */}
@@ -183,9 +144,6 @@ export default async function MangaPage({ params }: MangaPageProps) {
                 {manga.description}
               </p>
             </div>
-
-            {/* Rating */}
-            <RatingComponent mangaId={manga.id} currentRating={manga.rating} />
           </div>
         </div>
 
@@ -231,11 +189,6 @@ export default async function MangaPage({ params }: MangaPageProps) {
               <p className="text-gray-500 dark:text-gray-400">No chapters available yet.</p>
             </div>
           )}
-        </div>
-
-        {/* Comments */}
-        <div className="mt-12 mb-12">
-          <CommentSection mangaId={manga.id} />
         </div>
       </div>
     </div>
